@@ -29,3 +29,9 @@
   background-color: black;
   color: white;
 }
+
+.guideText {
+  color: white;
+  font-weight: 300;
+  margin: 10px;
+}
