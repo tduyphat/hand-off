@@ -1,5 +1,5 @@
 import { React, useState, useEffect, useRef } from "react";
-import { initNotifications, notify } from '@mycv/f8-notification';
+import { initNotifications, notify } from "@mycv/f8-notification";
 import { Howl } from "howler";
 
 import "./App.css";
@@ -19,12 +19,14 @@ const TRAINING_TIMES = 50;
 const TOUCHED_CONFIDENCE = 0.8;
 
 function App() {
-  const [guideText, setGuideText] = useState("");
-
   const video = useRef();
+  const canPlaySound = useRef(true);
   const model = useRef();
   const classifier = useRef();
+
+  const [guideText, setGuideText] = useState("");
   const [touched, setTouched] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const setupCamera = () => {
     return new Promise((resolve, reject) => {
@@ -66,8 +68,18 @@ function App() {
   const train = async (label) => {
     console.log(`[${label}] TRAINING`);
     for (let i = 0; i < TRAINING_TIMES; ++i) {
-      console.log(`Progress: ${parseInt(((i + 1) / TRAINING_TIMES) * 100)} %`);
+      const progress = parseInt(((i + 1) / TRAINING_TIMES) * 100);
+      console.log(`Progress: ${progress} %`);
+      setProgress(progress);
       await training(label);
+    }
+
+    if (label === UNTOUCHED_LABEL) {
+      setGuideText(
+        'Now place your hand on your neck, press "Train #2", then move your hand all round your face'
+      );
+    } else if (label === TOUCHED_LABEL) {
+      setGuideText('Training complete! Now press "Run"');
     }
   };
 
@@ -88,7 +100,11 @@ function App() {
         result.confidences[result.label] > TOUCHED_CONFIDENCE
       ) {
         console.log("Touched");
-        sound.play();
+        if (canPlaySound.current) {
+          canPlaySound.current = false;
+          sound.play();
+        }
+        notify("HANDS OFF!!!!", { body: "Yeah you heard that." });
         setTouched(true);
       } else {
         console.log("Untouched");
@@ -107,6 +123,10 @@ function App() {
 
   useEffect(() => {
     init();
+
+    sound.on("end", function () {
+      canPlaySound.current = true;
+    });
 
     //cleanup
     return () => {};
@@ -127,6 +147,7 @@ function App() {
           Run
         </button>
       </div>
+      <progress value={progress} max="100" />
     </div>
   );
 }

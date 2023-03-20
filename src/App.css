@@ -39,3 +39,9 @@
   font-weight: 300;
   margin: 10px;
 }
+
+progress {
+  height: 40px;
+  width: 80%;
+  margin-top: 10px;
+}
