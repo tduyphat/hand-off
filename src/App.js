@@ -79,7 +79,7 @@ function App() {
         'Now place your hand on your neck, press "Train #2", then move your hand all round your face'
       );
     } else if (label === TOUCHED_LABEL) {
-      setGuideText('Training complete! Now press "Run"');
+      setGuideText('Training complete! Now press "Run" and see if you can keep your hands off your face ;)');
     }
   };
 
